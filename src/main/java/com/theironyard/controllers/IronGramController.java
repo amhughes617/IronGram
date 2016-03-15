@@ -3,6 +3,7 @@ package com.theironyard.controllers;
 import com.theironyard.entities.User;
 import com.theironyard.services.PhotoRepository;
 import com.theironyard.services.UserRepository;
+import com.theironyard.utils.PasswordStorage;
 import org.h2.tools.Server;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.sql.SQLException;
 
@@ -37,7 +39,17 @@ public class IronGramController {
     }
 
     @RequestMapping(path = "/login", method = RequestMethod.POST)
-    public User login() {
+    public User login(String username, String password, HttpSession session, HttpServletResponse response) throws Exception {
+        User user = users.findByName(username);
+        if (user == null) {
+            user = new User(username, PasswordStorage.createHash(password));
+            users.save(user);
+        }
+        else if (!PasswordStorage.verifyPassword(password, user.getPasswordHash())) {
+            throw new Exception("Wrong password");
+        }
+        session.setAttribute("userName", username);
+        response.sendRedirect("/");
         return null;
     }
 
