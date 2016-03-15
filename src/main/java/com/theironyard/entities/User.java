@@ -1,10 +1,8 @@
 package com.theironyard.entities;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 
 /**
  * Created by alexanderhughes on 3/15/16.
@@ -19,6 +17,7 @@ public class User {
     private String name;
     @NotNull
     private String passwordHash;
+
 
     public User() {
     }

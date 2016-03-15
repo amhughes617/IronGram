@@ -2,6 +2,7 @@ package com.theironyard.entities;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 
 /**
  * Created by alexanderhughes on 3/15/16.
@@ -18,14 +19,18 @@ public class Photo {
     private User recipient;
     @NotNull
     private String fileName;
+    @NotNull
+    int timeToView;
+    LocalDateTime time;
 
     public Photo() {
     }
 
-    public Photo(User sender, User recipient, String fileName) {
+    public Photo(User sender, User recipient, String fileName, int timeToView) {
         this.sender = sender;
         this.recipient = recipient;
         this.fileName = fileName;
+        this.timeToView = timeToView;
     }
 
     public User getSender() {
@@ -50,5 +55,21 @@ public class Photo {
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
+    }
+
+    public LocalDateTime getTime() {
+        return time;
+    }
+
+    public void setTime(LocalDateTime time) {
+        this.time = time;
+    }
+
+    public int getTimeToView() {
+        return timeToView;
+    }
+
+    public void setTimeToView(int timeToView) {
+        this.timeToView = timeToView;
     }
 }

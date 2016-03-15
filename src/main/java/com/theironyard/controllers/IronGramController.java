@@ -19,6 +19,7 @@ import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -65,7 +66,7 @@ public class IronGramController {
     }
 
     @RequestMapping(path = "/upload", method = RequestMethod.POST)
-    public Photo upload(MultipartFile photo, HttpServletResponse response, HttpSession session) throws Exception {
+    public Photo upload(int timeToView, MultipartFile photo, HttpServletResponse response, HttpSession session) throws Exception {
         String userName = (String) session.getAttribute("userName");
         if (userName == null) {
             throw new Exception("Not logged in");
@@ -75,13 +76,25 @@ public class IronGramController {
         File photoFile = File.createTempFile("image", photo.getOriginalFilename(), new File("public"));
         FileOutputStream fos = new FileOutputStream(photoFile);
         fos.write(photo.getBytes());
-        Photo p = new Photo(user, null, photoFile.getName());
+        Photo p = new Photo(user, null, photoFile.getName(), timeToView);
         photos.save(p);
         response.sendRedirect("/");
         return p;
     }
     @RequestMapping(path = "/photos", method = RequestMethod.GET)
     public List<Photo> showPhotos() {
-        return (List<Photo>) photos.findAll();
+        List<Photo> list = (List<Photo>) photos.findAll();
+        for (Photo photo : list) {
+            if (photo.getTime() == null) {
+                photo.setTime(LocalDateTime.now());
+                photos.save(photo);
+            }
+            else if (LocalDateTime.now().isAfter(photo.getTime().plusSeconds(photo.getTimeToView()))) {
+                    photos.delete(photo);
+                    File f = new File("public/" + photo.getFileName());
+                    f.delete();
+            }
+        }
+        return list;
     }
 }
