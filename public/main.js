@@ -11,19 +11,29 @@ function getPhotos(photosData) {
         }
     }
 }
+function logout() {
+    $.post(
+        "/logout"
+    );
 
+}
 function getUser() {
     $.get(
         "/user",
         function(userData) {
             if (userData.length == 0) {
+                $("#photos").empty();
                 $("#login").show();
+                $("#upload").hide();
+                $("#logout").hide();
             }
             else {
                 $("#upload").show();
+                $("#login").hide();
                 $.get("/photos", getPhotos);
             }
         }
     );
 }
+getUser();
 setInterval(getUser,1000);

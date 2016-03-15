@@ -66,35 +66,46 @@ public class IronGramController {
     }
 
     @RequestMapping(path = "/upload", method = RequestMethod.POST)
-    public Photo upload(int timeToView, MultipartFile photo, HttpServletResponse response, HttpSession session) throws Exception {
+    public Photo upload(int timeToView, String recipient, MultipartFile photo, HttpServletResponse response, HttpSession session) throws Exception {
         String userName = (String) session.getAttribute("userName");
         if (userName == null) {
             throw new Exception("Not logged in");
         }
-        User user = users.findByName(userName);
-
+        User sender = users.findByName(userName);
         File photoFile = File.createTempFile("image", photo.getOriginalFilename(), new File("public"));
         FileOutputStream fos = new FileOutputStream(photoFile);
         fos.write(photo.getBytes());
-        Photo p = new Photo(user, null, photoFile.getName(), timeToView);
+        Photo p = new Photo(sender, (users.findByName(recipient) == null) ? null : users.findByName(recipient), photoFile.getName(), timeToView);
         photos.save(p);
         response.sendRedirect("/");
         return p;
     }
     @RequestMapping(path = "/photos", method = RequestMethod.GET)
-    public List<Photo> showPhotos() {
+    public List<Photo> showPhotos(HttpSession session) {
+        User user = users.findByName((String) session.getAttribute("userName"));
         List<Photo> list = (List<Photo>) photos.findAll();
+        List<Photo> receiptList = photos.findByRecipient(user);
         for (Photo photo : list) {
+            if (photo.getRecipient() == null) {
+                receiptList.add(photo);
+            }
+        }
+        for (Photo photo : receiptList) {
             if (photo.getTime() == null) {
                 photo.setTime(LocalDateTime.now());
                 photos.save(photo);
             }
             else if (LocalDateTime.now().isAfter(photo.getTime().plusSeconds(photo.getTimeToView()))) {
-                    photos.delete(photo);
-                    File f = new File("public/" + photo.getFileName());
-                    f.delete();
+                photos.delete(photo);
+                File f = new File("public/" + photo.getFileName());
+                f.delete();
             }
         }
-        return list;
+        return receiptList;
+    }
+
+    @RequestMapping(path = "/logout", method = RequestMethod.POST)
+    public void logout(HttpSession session) {
+        session.invalidate();
     }
 }

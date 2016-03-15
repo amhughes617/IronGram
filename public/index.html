@@ -8,10 +8,14 @@
 
 <form action="/upload" method="post" enctype="multipart/form-data" id="upload" hidden>
     <input type="number" placeholder="Time to view" name="timeToView">
+    <input type="text" placeholder="Recipient name" name="recipient">
     <input type="file" name="photo">
     <button type="submit">Upload</button>
 </form>
 <div id="photos"></div>
+
+<button onclick="logout()" id="logout">Logout</button>
+
 <script src="jquery-2.2.1.js"></script>
 <script src="main.js"></script>
 </body>
